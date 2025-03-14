@@ -1,0 +1,131 @@
+{% extends 'skeleton/base.html' %}
+
+{% block content %}
+<img style="width: 100%" class="img-fluid"
+     src="https://res.cloudinary.com/djskafzqr/image/upload/v1734439997/wfi0npcwfrhbz2chvmhv.jpg">
+<div class="container">
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="form-floating mb-3 mt-3 col-4">
+                <input class="form-control" type="datetime-local" id="ckin_date" name="ckin_date" onchange="updateDate()"
+                       required>
+                <label for="ckin_date" style="margin-left: 10px">Ngày nhận phòng:</label>
+            </div>
+            <div class=" form-floating mb-3 mt-3 col-4">
+                <input class="form-control" type="datetime-local" id="ckout_date" name="ckout_date" onchange="updateDate()"
+                       required>
+                <label for="ckout_date" style="margin-left: 10px">Ngày trả phòng:</label>
+            </div>
+            <div class="form-floating mb-3 mt-3 col-4">
+                <input class="form-control" type="text" id="nr_nc" name="nr_nc" value="1 phòng, 2 khách" readonly>
+                <label for="nr_nc" style="margin-left: 10px">Chọn phòng và khách</label>
+                <div class="rounded" id="popupDiv">
+                    <div class="reser-body container-fluid mb-1" id="reser-form">
+                        <div class="row mt-2 mb-2">
+                            <div class="col-md-2 col-2"></div>
+                            <div class="col-md-4 col-4 text-center">Khách nội địa</div>
+                            <div class="col-md-4 col-4 text-center">Khách nước ngoài</div>
+                            <div class="col-md-2 col-2"></div>
+                        </div>
+
+                        <div class="row mt-2 mb-2 room-row">
+                            <div class="col-md-2 col-2 text-start room-oder">Phòng 1</div>
+                            <div class="col-md-4 col-4">
+                                <input id="sl-knd1" class="sl-knd form-control" style="width: 100%" type="number" min="0"
+                                       max="3"
+                                       value="1">
+                            </div>
+                            <div class="col-md-4 col-4">
+                                <input id="sl-knn1" class="sl-knn form-control" style="width: 100%" type="number" min="0" max="3"
+                                       value="0">
+                            </div>
+                            <div class="col-md-2 col-2">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="reser-footer row" style="justify-content: flex-end">
+                        <div class="col-md-4 col-4">
+                            <button class="btn btn-primary btn-w1" onclick="updateRoomLine()">Thêm phòng</button>
+                        </div>
+                        <div class="col-md-3 col-3">
+                            <button class="btn btn-primary btn-w1" id="btn-done" onclick="closePopUpDiv()">Xong</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <div class="row" style="align-items: start">
+            <div class="col-md-8 row">
+                {% for r in rooms %}
+                <div class="col-md-12 col-12 p-2">
+                    <div class="card">
+                        <img class="card-img-top" src="{{ r.img }}" alt="{{ r.name }}">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ r.name }}</h4>
+                            <p class="card-text">{{ r.price }} VNĐ</p>
+                            <a href="#" class="btn btn-primary">Xem chi tiết</a>
+                            <button class="btn btn-danger"> Chọn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 p-2" style="position: sticky; top: 3.5rem">
+                <div class="card">
+                    <img class="card-img-top" src="" alt="a">
+                    <div class="card-body">
+                        <h4 class="card-title" id="a1">a</h4>
+                        <p class="card-text">a VNĐ</p>
+                        <a href="#" class="btn btn-primary">Xem chi tiết</a>
+                        <button class="btn btn-danger" onclick="sendData()"> Đặt phòng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form action="{{ url_for('create_payment') }}" method="post">
+        <button type="submit" class="btn" style="color: white; background-color: #eb2f96">Thanh toán 50,000 VND</button>
+    </form>
+    <form method="get">
+        <div class="mb-3 mt-3">
+            <label for="name" class="form-label">Find:</label>
+            <input type="text" class="form-control" id="name" name="keyword" placeholder="">
+            <label for="datetime">Chọn ngày và giờ:</label>
+            <input type="datetime-local" id="datetime" name="datetime">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    {% if u1: %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for u in u1 %}
+        <tr>
+            <td>{{u.name}}</td>
+            <td>{{u.email}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% endblock %}
+</div>
+
+
+
+
