@@ -180,27 +180,34 @@ async function fetchCurrentUserId() {
     }
 }
 
-
-
-async function sendData() {
+async function sendReservationData(data) {
     try {
-        const userData = await fetchCurrentUserId(); // Đợi lấy user_id từ server
-        const ckinDate = convertDateTime(document.getElementById("ckin_date").value);
-        const ckoutDate = convertDateTime(document.getElementById("ckout_date").value);
-
-        const dataToSend = JSON.stringify({
-            "booker_id": userData.user_id, // Lấy user_id từ dữ liệu trả về
-            "bookingDate": convertDateTime(formatDateTime(new Date())),
-            "checkinDate": ckinDate,
-            "checkoutDate": ckoutDate,
-            "roomData": extractData()
+        const response = await fetch('/api/create-reservation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: data
         });
 
-        console.log(dataToSend);
-        return dataToSend;
-
+        const result = await response.json();
+        if (response.ok) {
+            alert("Đặt phòng thành công!");
+            return result;
+        } else {
+            alert("Lỗi: " + result.error);
+        }
     } catch (error) {
-        console.error('Lỗi khi gửi dữ liệu:', error.message);
+        console.error('Lỗi:', error);
+        alert("Có lỗi xảy ra khi đặt phòng");
+    }
+}
+
+// Sửa lại hàm sendData để gọi API
+async function sendData() {
+    const data = await sendReservationData(await getReservationData());
+    if (data) {
+        window.location.href = '/'; // Chuyển về trang chủ sau khi đặt phòng thành công
     }
 }
 

@@ -1,6 +1,6 @@
 from sqlalchemy.testing.suite.test_reflection import users
 import hashlib
-from app import db, app, password
+from app import db, app#, password
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime

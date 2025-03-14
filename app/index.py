@@ -15,6 +15,9 @@ from app import app, login
 from app.dao import load_rooms
 from flask_login import login_user, logout_user, current_user
 from app.models import User
+from datetime import datetime
+from flask import jsonify
+
 endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
 accessKey = "F8BBA842ECF85"
 secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
@@ -194,8 +197,8 @@ def login_admin_process():
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin_dashboard():
-    if current_user.user.type != 'admin':  # Nếu không phải admin
-        return redirect('/')
+    # if current_user.user.type != 'admin':  # Nếu không phải admin
+    #     return redirect('/')
     # Nội dung cho admin
     return redirect('/admin')
 # @app.route('/admin', methods=['GET', 'POST'])
@@ -232,10 +235,64 @@ def register():
             err_msg = 'Mật khẩu không khớp!'
     return render_template('register.html')
 
+#
+# @app.route('/api/getuserid', methods=['GET'])
+# def get_userid():
+#     return current_user.id
 
 @app.route('/api/getuserid', methods=['GET'])
+@login_required  # Thêm decorator này
 def get_userid():
-    return current_user.id
+    if current_user.is_authenticated:
+        return {"user_id": current_user.user.id}
+    return {"error": "User not logged in"}, 401
+
+@app.route('/api/create-reservation', methods=['POST'])
+@login_required
+def create_reservation():
+    try:
+        data = request.json
+        
+        # Tạo reservation mới
+        reservation = Reservation(
+            booker_id=data['booker_id'],
+            booking_date=datetime.strptime(data['bookingDate'], '%Y-%m-%d %H:%M:%S'),
+            checkin_date=datetime.strptime(data['checkinDate'], '%Y-%m-%d %H:%M:%S'), 
+            checkout_date=datetime.strptime(data['checkoutDate'], '%Y-%m-%d %H:%M:%S')
+        )
+        db.session.add(reservation)
+        db.session.flush()
+
+        # Xử lý từng phòng trong roomData
+        for room_data in data['roomData']:
+            # Tìm phòng trống phù hợp
+            room = Room.query.filter_by(name=room_data['name']).first()
+            if not room:
+                raise Exception(f"Không tìm thấy {room_data['name']}")
+
+            # Tạo RoomReservation
+            room_reservation = RoomReservation(
+                room_id=room.id,
+                reservation_id=reservation.id,
+                price=room.price
+            )
+            db.session.add(room_reservation)
+            db.session.flush()
+
+            # Thêm khách cho phòng
+            for _ in range(int(room_data['sl_knd'])):
+                cus_room = CustomerRoomReservation(
+                    room_reservation_id=room_reservation.id,
+                    cus_id=data['booker_id']  # Tạm thời dùng booker_id
+                )
+                db.session.add(cus_room)
+
+        db.session.commit()
+        return jsonify({"message": "Đặt phòng thành công", "reservation_id": reservation.id})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
 
 
 @login.user_loader
